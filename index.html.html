@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriZiro — Калькулятор питания</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede8dc;
+  --card: #fdfaf4;
+  --primary: #4a7c59;
+  --primary-dark: #355c41;
+  --primary-light: #e8f2eb;
+  --accent: #c0392b;
+  --accent-light: #fdecea;
+  --sand: #c9a96e;
+  --sand-light: #fdf6ea;
+  --olive: #7a8c5c;
+  --olive-light: #f2f5eb;
+  --text: #2c2416;
+  --text-2: #6b5e48;
+  --text-3: #a8977e;
+  --border: #e0d5c0;
+  --shadow: 0 8px 32px rgba(74,124,89,0.10);
+  --radius: 20px;
+  --radius-sm: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 10% 10%, rgba(74,124,89,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 90% 90%, rgba(201,169,110,0.10) 0%, transparent 60%);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 12px 48px;
+}
+
+h1.app-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+h1.app-title span { color: var(--primary); }
+
+/* TABS */
+.tabs {
+  display: flex;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 5px;
+  gap: 4px;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+}
+.tab-btn {
+  flex: 1;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .2s;
+  background: transparent;
+  color: var(--text-3);
+}
+.tab-btn.active {
+  background: var(--primary);
+  color: #fdfaf4;
+  box-shadow: 0 4px 14px rgba(74,124,89,.30);
+}
+.tab-btn:not(.active):hover { background: var(--primary-light); color: var(--primary); }
+
+/* CARD */
+.card {
+  background: var(--card);
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+  padding: 26px 22px;
+  animation: fadeUp .35s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* FORM ELEMENTS */
+label.lbl {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  margin: 14px 0 5px;
+}
+
+select, input[type=number], input[type=text] {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14.5px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+select:focus, input:focus {
+  border-color: var(--primary);
+  background: var(--card);
+  box-shadow: 0 0 0 3px rgba(74,124,89,.13);
+}
+
+.row2 { display: flex; gap: 8px; }
+.row2 > * { flex: 1; }
+
+/* BUTTONS */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .18s;
+  margin-top: 12px;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(.98); }
+
+.btn-primary { background: var(--primary); color: #fdfaf4; box-shadow: 0 4px 14px rgba(74,124,89,.30); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-dark { background: var(--text); color: #fdfaf4; box-shadow: 0 4px 14px rgba(44,36,22,.20); }
+.btn-dark:hover { background: #3d3120; }
+.btn-green { background: var(--olive); color: #fdfaf4; box-shadow: 0 4px 14px rgba(122,140,92,.28); }
+.btn-green:hover { background: #606e47; }
+.btn-red { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(192,57,43,.22); }
+.btn-red:hover { background: #a93226; }
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  box-shadow: none;
+}
+.btn-outline:hover { background: var(--primary-light); }
+
+/* RESULT BOX */
+.result-box {
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #c5dbc9;
+}
+.result-box.empty { text-align: center; color: var(--text-3); font-style: italic; padding: 20px; background: var(--bg); border-color: var(--border); }
+.macro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.macro-item {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 2px 8px rgba(74,124,89,.07);
+  border: 1px solid var(--border);
+}
+.macro-item .mi-label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; }
+.macro-item .mi-val { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 900; color: var(--text); }
+.macro-item .mi-val span { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.macro-item.kcal .mi-val { color: var(--primary); }
+.macro-item.prot .mi-val { color: #c0392b; }
+.macro-item.fat  .mi-val { color: var(--sand); }
+.macro-item.carb .mi-val { color: var(--olive); }
+
+/* DIVIDER */
+.divider { border: none; border-top: 2px solid var(--border); margin: 20px 0; }
+.section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+/* DIARY */
+.meal-block { margin-bottom: 14px; }
+.meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.meal-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+}
+.meal-kcal { font-size: 12px; color: var(--text-3); font-weight: 600; }
+.meal-entries { display: flex; flex-direction: column; gap: 5px; }
+.meal-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: 9px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  font-size: 13.5px;
+}
+.meal-entry .entry-name { flex: 1; font-weight: 600; color: var(--text); }
+.meal-entry .entry-meta { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.entry-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color .15s;
+  flex-shrink: 0;
+}
+.entry-del:hover { color: var(--accent); }
+
+.diary-totals {
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-top: 14px;
+  border: 1.5px solid #c5dbc9;
+}
+.diary-totals .dt-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--primary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.dt-row { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 4px; color: var(--text-2); }
+.dt-row span { font-weight: 700; color: var(--text); }
+
+/* GOAL PROGRESS */
+.goal-bar-wrap { margin-top: 8px; }
+.goal-bar-label { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-3); margin-bottom: 3px; }
+.goal-bar-bg { background: #c5dbc9; border-radius: 99px; height: 7px; overflow: hidden; }
+.goal-bar { height: 100%; border-radius: 99px; background: var(--primary); transition: width .4s; }
+.goal-bar.over { background: var(--accent); }
+
+/* BMI */
+.bmi-result {
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1.5px solid #c5dbc9;
+  margin-top: 14px;
+}
+.bmi-big {
+  font-family: 'Nunito', sans-serif;
+  font-size: 44px;
+  font-weight: 900;
+  color: var(--primary);
+  line-height: 1;
+}
+.bmi-cat {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+.norm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.norm-item {
+  background: var(--card);
+  border-radius: 9px;
+  padding: 11px 13px;
+  box-shadow: 0 2px 8px rgba(74,124,89,.06);
+  border: 1px solid var(--border);
+}
+.norm-item .ni-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-3); }
+.norm-item .ni-val { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900; color: var(--text); }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+}
+.badge-blue  { background: #ddeef6; color: #2471a3; }
+.badge-green { background: var(--primary-light); color: var(--primary); }
+.badge-yellow{ background: var(--sand-light); color: #9a7d0a; }
+.badge-red   { background: var(--accent-light); color: var(--accent); }
+
+.empty-diary {
+  text-align: center;
+  padding: 28px 0;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+select optgroup { font-weight: 700; color: var(--text); }
+
+/* ADD TO DIARY dropdown */
+.add-diary-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+.add-diary-row select { flex: 1; margin: 0; }
+.add-diary-row .btn { margin: 0; width: auto; padding: 11px 16px; font-size: 13.5px; white-space: nowrap; }
+
+/* API RESULTS */
+.api-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.api-item:last-child { border-bottom: none; }
+.api-item:hover { background: var(--primary-light); }
+.api-item-name { font-weight: 700; font-size: 13.5px; color: var(--text); }
+.api-item-meta { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.api-item-macros { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+.api-spinner { text-align:center; padding: 18px; color: var(--text-3); font-size: 13px; }
+
+</style>
+</head>
+<body>
+
+<h1 class="app-title">🌿 Nutri<span>Ziro</span></h1>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('calc')">🧮 Калькулятор</button>
+  <button class="tab-btn" onclick="switchTab('diary')">📒 Дневник</button>
+  <button class="tab-btn" onclick="switchTab('norms')">⚖️ Нормы</button>
+</div>
+
+<div class="card">
+
+  <!-- ═══════ TAB: CALCULATOR ═══════ -->
+  <div class="tab-panel active" id="tab-calc">
+
+    <!-- ONLINE SEARCH BLOCK -->
+    <div class="section-title" style="margin-bottom:8px;">🌐 Поиск по базе (Open Food Facts)</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="api-search" placeholder="Например: гречка, творог, банан..." style="flex:1;margin:0;" onkeydown="if(event.key==='Enter')searchOnline()">
+      <button class="btn btn-primary" style="width:auto;margin:0;padding:11px 16px;font-size:13.5px;white-space:nowrap;" onclick="searchOnline()">🔍 Найти</button>
+    </div>
+    <div id="api-status" style="font-size:12px;color:var(--text-3);margin-top:6px;min-height:18px;"></div>
+    <div id="api-results" style="display:none;margin-top:8px;max-height:220px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff;">
+    </div>
+
+    <hr class="divider">
+    <div class="section-title" style="margin-bottom:8px;">📋 Или выберите из встроенной базы</div>
+
+    <label class="lbl">Быстрый фильтр</label>
+    <input type="text" id="search" placeholder="Начните вводить название..." oninput="filterProducts()">
+
+    <label class="lbl">Выберите продукт</label>
+    <select id="product"></select>
+
+    <label class="lbl">Граммы</label>
+    <input type="number" id="grams" value="100" min="1">
+
+    <button class="btn btn-primary" onclick="calculate()">📊 Рассчитать</button>
+
+    <div id="result" class="result-box empty">Выберите продукт и нажмите «Рассчитать»</div>
+
+    <!-- CHART -->
+    <div id="chart-wrap" style="display:none;margin-top:14px;text-align:center;">
+      <canvas id="bjuChart" width="220" height="220" style="display:block;margin:0 auto;"></canvas>
+      <div id="chart-legend" style="display:flex;justify-content:center;gap:16px;margin-top:10px;flex-wrap:wrap;"></div>
+    </div>
+
+    <div id="add-to-diary-block" style="display:none">
+      <div class="add-diary-row">
+        <select id="diary-meal-select">
+          <option value="breakfast">🌅 Завтрак</option>
+          <option value="lunch">☀️ Обед</option>
+          <option value="dinner">🌙 Ужин</option>
+          <option value="snack">🍎 Перекус</option>
+        </select>
+        <button class="btn btn-green" onclick="addToDiary()">➕ В дневник</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-title">➕ Добавить свой продукт</div>
+
+    <label class="lbl">Название</label>
+    <input type="text" id="name" placeholder="Например: Творог 5%">
+
+    <div class="row2">
+      <div>
+        <label class="lbl">Ккал / 100г</label>
+        <input type="number" id="cal" placeholder="121" step="any">
+      </div>
+      <div>
+        <label class="lbl">Белки</label>
+        <input type="number" id="prot" placeholder="17" step="any">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label class="lbl">Жиры</label>
+        <input type="number" id="fat2" placeholder="5" step="any">
+      </div>
+      <div>
+        <label class="lbl">Углеводы</label>
+        <input type="number" id="carb" placeholder="3" step="any">
+      </div>
+    </div>
+
+    <button class="btn btn-dark" onclick="addProduct()">Добавить продукт</button>
+  </div>
+
+  <!-- ═══════ TAB: DIARY ═══════ -->
+  <div class="tab-panel" id="tab-diary">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="section-title">📒 Дневник питания</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" style="width:auto;margin:0;padding:8px 14px;font-size:13px;" onclick="exportDiary()">📥 Экспорт</button>
+        <button class="btn btn-red" style="width:auto;margin:0;padding:8px 14px;font-size:13px;" onclick="clearDiary()">🗑 Очистить</button>
+      </div>
+    </div>
+    <div id="diary-content"></div>
+  </div>
+
+  <!-- ═══════ TAB: NORMS ═══════ -->
+  <div class="tab-panel" id="tab-norms">
+    <div class="section-title">⚖️ ИМТ и суточная норма</div>
+
+    <div class="row2">
+      <div>
+        <label class="lbl">Пол</label>
+        <select id="gender">
+          <option value="male">Мужской</option>
+          <option value="female">Женский</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Возраст</label>
+        <input type="number" id="age" placeholder="25" min="1" max="120">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label class="lbl">Рост (см)</label>
+        <input type="number" id="height" placeholder="175" min="50" max="250">
+      </div>
+      <div>
+        <label class="lbl">Вес (кг)</label>
+        <input type="number" id="weight" placeholder="70" min="20" max="300">
+      </div>
+    </div>
+
+    <label class="lbl">Уровень активности</label>
+    <select id="activity">
+      <option value="1.2">🛋 Сидячий образ жизни</option>
+      <option value="1.375">🚶 Лёгкая активность (1-3 раза/нед)</option>
+      <option value="1.55" selected>🏃 Умеренная активность (3-5 раз/нед)</option>
+      <option value="1.725">💪 Высокая активность (6-7 раз/нед)</option>
+      <option value="1.9">🔥 Экстремальная активность</option>
+    </select>
+
+    <button class="btn btn-primary" onclick="calcBMI()">📐 Рассчитать</button>
+
+    <div id="bmi-result" style="display:none" class="bmi-result">
+      <div style="margin-bottom:6px;font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;">Индекс массы тела</div>
+      <div class="bmi-big" id="bmi-val">—</div>
+      <div class="bmi-cat" id="bmi-cat"></div>
+
+      <div class="norm-grid" id="norm-grid"></div>
+    </div>
+
+    <div id="save-goal-block" style="display:none;margin-top:10px;">
+      <button class="btn btn-green" onclick="saveGoal()">💾 Сохранить как мою цель</button>
+    </div>
+    <div id="goal-saved-msg" style="display:none;text-align:center;color:var(--green);font-weight:700;font-size:13px;margin-top:8px;">✅ Цель сохранена! Она отображается в дневнике.</div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const DEFAULT_PRODUCTS = {
+  cereals: {
+    label: "🌾 Крупы и зерновые",
+    items: {
+      rice_boiled:    { name:"Рис варёный",        calories:130, protein:2.7, fat:0.3, carbs:28 },
+      buckwheat:      { name:"Гречка варёная",      calories:110, protein:4,   fat:1,   carbs:21 },
+      pasta_boiled:   { name:"Макароны варёные",    calories:131, protein:5,   fat:1.1, carbs:25 },
+      oatmeal:        { name:"Овсяная каша",        calories:120, protein:4,   fat:2.5, carbs:20 },
+      millet:         { name:"Пшено варёное",       calories:119, protein:3,   fat:0.7, carbs:24 },
+    }
+  },
+  meat: {
+    label: "🥩 Мясо и птица",
+    items: {
+      chicken_boiled: { name:"Куриная грудка варёная", calories:165, protein:31,  fat:3.6, carbs:0 },
+      chicken_fried:  { name:"Курица жареная",         calories:220, protein:27,  fat:12,  carbs:0 },
+      beef_boiled:    { name:"Говядина варёная",        calories:218, protein:25,  fat:12,  carbs:0 },
+      pork_boiled:    { name:"Свинина варёная",         calories:260, protein:22,  fat:19,  carbs:0 },
+      turkey_boiled:  { name:"Индейка варёная",         calories:195, protein:29,  fat:8,   carbs:0 },
+    }
+  },
+  fish: {
+    label: "🐟 Рыба и морепродукты",
+    items: {
+      salmon:         { name:"Лосось (запечённый)", calories:200, protein:25,  fat:11,  carbs:0 },
+      tuna_canned:    { name:"Тунец (консерва)",    calories:130, protein:29,  fat:1,   carbs:0 },
+      cod_boiled:     { name:"Треска варёная",      calories:98,  protein:21,  fat:1,   carbs:0 },
+    }
+  },
+  dairy: {
+    label: "🥛 Молочные продукты",
+    items: {
+      egg:            { name:"Яйцо куриное",        calories:155, protein:13,  fat:11,  carbs:1.1 },
+      cottage_cheese: { name:"Творог 5%",           calories:121, protein:17,  fat:5,   carbs:3 },
+      greek_yogurt:   { name:"Греческий йогурт",    calories:97,  protein:9,   fat:5,   carbs:3.6 },
+      milk:           { name:"Молоко 2.5%",         calories:52,  protein:2.8, fat:2.5, carbs:4.7 },
+    }
+  },
+  vegetables: {
+    label: "🥦 Овощи",
+    items: {
+      broccoli:       { name:"Брокколи",            calories:34,  protein:2.8, fat:0.4, carbs:7 },
+      carrot:         { name:"Морковь",             calories:41,  protein:0.9, fat:0.2, carbs:10 },
+      cucumber:       { name:"Огурец",              calories:15,  protein:0.7, fat:0.1, carbs:3.6 },
+      tomato:         { name:"Помидор",             calories:18,  protein:0.9, fat:0.2, carbs:3.9 },
+    }
+  },
+  fruits: {
+    label: "🍌 Фрукты и ягоды",
+    items: {
+      banana:         { name:"Банан",               calories:89,  protein:1.1, fat:0.3, carbs:23 },
+      apple:          { name:"Яблоко",              calories:52,  protein:0.3, fat:0.2, carbs:14 },
+      orange:         { name:"Апельсин",            calories:47,  protein:0.9, fat:0.1, carbs:12 },
+      strawberry:     { name:"Клубника",            calories:32,  protein:0.7, fat:0.3, carbs:7.7 },
+    }
+  },
+  other: {
+    label: "🧂 Прочее",
+    items: {
+      bread_white:    { name:"Хлеб белый",          calories:265, protein:8,   fat:3,   carbs:49 },
+      olive_oil:      { name:"Масло оливковое",     calories:884, protein:0,   fat:100, carbs:0 },
+    }
+  }
+};
+
+function getCustomProducts() {
+  try { return JSON.parse(localStorage.getItem('customProducts') || '{}'); } catch(e) { return {}; }
+}
+function saveCustomProducts(obj) {
+  localStorage.setItem('customProducts', JSON.stringify(obj));
+}
+
+function getDiary() {
+  try { return JSON.parse(localStorage.getItem('diary') || '{"breakfast":[],"lunch":[],"dinner":[],"snack":[]}'); }
+  catch(e) { return {breakfast:[],lunch:[],dinner:[],snack:[]}; }
+}
+function saveDiary(d) { localStorage.setItem('diary', JSON.stringify(d)); }
+
+function getGoal() {
+  try { return JSON.parse(localStorage.getItem('goal') || 'null'); } catch(e) { return null; }
+}
+function saveGoalLS(g) { localStorage.setItem('goal', JSON.stringify(g)); }
+
+// ─── PRODUCT LOOKUP ──────────────────────────────────────────────────────────
+function findProduct(key) {
+  for (const cat of Object.values(DEFAULT_PRODUCTS)) {
+    if (cat.items[key]) return cat.items[key];
+  }
+  const custom = getCustomProducts();
+  if (custom[key]) return custom[key];
+  return null;
+}
+
+// ─── BUILD SELECT ─────────────────────────────────────────────────────────────
+function buildProductSelect() {
+  const sel = document.getElementById('product');
+  sel.innerHTML = '';
+
+  for (const [catKey, cat] of Object.entries(DEFAULT_PRODUCTS)) {
+    const og = document.createElement('optgroup');
+    og.label = cat.label;
+    for (const [key, item] of Object.entries(cat.items)) {
+      const o = document.createElement('option');
+      o.value = key; o.textContent = item.name;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+
+  const custom = getCustomProducts();
+  if (Object.keys(custom).length > 0) {
+    const og = document.createElement('optgroup');
+    og.label = '⭐ Мои продукты';
+    for (const [key, item] of Object.entries(custom)) {
+      const o = document.createElement('option');
+      o.value = key; o.textContent = item.name;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+}
+
+// ─── CALCULATE ───────────────────────────────────────────────────────────────
+let lastCalcResult = null;
+
+function calculate() {
+  const key  = document.getElementById('product').value;
+  const g    = parseFloat(document.getElementById('grams').value);
+  const res  = document.getElementById('result');
+  const diaryBlock = document.getElementById('add-to-diary-block');
+
+  if (!key || isNaN(g) || g <= 0) {
+    res.className = 'result-box empty';
+    res.innerHTML = 'Введите корректное количество граммов.';
+    diaryBlock.style.display = 'none';
+    document.getElementById('chart-wrap').style.display = 'none';
+    lastCalcResult = null;
+    return;
+  }
+
+  const data = findProduct(key);
+  if (!data) {
+    res.className = 'result-box empty';
+    res.innerHTML = 'Продукт не найден.';
+    diaryBlock.style.display = 'none';
+    document.getElementById('chart-wrap').style.display = 'none';
+    lastCalcResult = null;
+    return;
+  }
+
+  const cal  = (data.calories / 100) * g;
+  const prot = (data.protein  / 100) * g;
+  const fat  = (data.fat      / 100) * g;
+  const carb = (data.carbs    / 100) * g;
+
+  lastCalcResult = { key, name: data.name, grams: g, calories: cal, protein: prot, fat: fat, carbs: carb };
+
+  res.className = 'result-box';
+  res.innerHTML = `
+    <div class="macro-grid">
+      <div class="macro-item kcal">
+        <div class="mi-label">🔥 Калории</div>
+        <div class="mi-val">${cal.toFixed(1)}<span> ккал</span></div>
+      </div>
+      <div class="macro-item prot">
+        <div class="mi-label">🥩 Белки</div>
+        <div class="mi-val">${prot.toFixed(1)}<span> г</span></div>
+      </div>
+      <div class="macro-item fat">
+        <div class="mi-label">🧈 Жиры</div>
+        <div class="mi-val">${fat.toFixed(1)}<span> г</span></div>
+      </div>
+      <div class="macro-item carb">
+        <div class="mi-label">🍞 Углеводы</div>
+        <div class="mi-val">${carb.toFixed(1)}<span> г</span></div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--text-3);text-align:right;">${data.name} · ${g}г</div>
+  `;
+
+  diaryBlock.style.display = 'block';
+  document.getElementById('chart-wrap').style.display = 'block';
+  drawChart(prot, fat, carb);
+}
+
+// ─── ADD PRODUCT ─────────────────────────────────────────────────────────────
+function addProduct() {
+  const name = document.getElementById('name').value.trim();
+  const cal  = document.getElementById('cal').value;
+  const prot = document.getElementById('prot').value;
+  const fat  = document.getElementById('fat2').value;
+  const carb = document.getElementById('carb').value;
+
+  if (!name || !cal) { alert('⚠️ Заполни хотя бы название и калории!'); return; }
+
+  const key = 'custom_' + Date.now();
+  const custom = getCustomProducts();
+  custom[key] = {
+    name,
+    calories: +cal || 0,
+    protein:  +prot || 0,
+    fat:      +fat  || 0,
+    carbs:    +carb || 0,
+  };
+  saveCustomProducts(custom);
+  buildProductSelect();
+
+  // select new product
+  document.getElementById('product').value = key;
+
+  document.getElementById('name').value = '';
+  document.getElementById('cal').value  = '';
+  document.getElementById('prot').value = '';
+  document.getElementById('fat2').value = '';
+  document.getElementById('carb').value = '';
+
+  alert('✅ Продукт «' + name + '» добавлен!');
+}
+
+// ─── OPEN FOOD FACTS API ─────────────────────────────────────────────────────
+let apiSearchTimeout = null;
+
+async function searchOnline() {
+  const q = document.getElementById('api-search').value.trim();
+  if (!q) return;
+
+  const status  = document.getElementById('api-status');
+  const resBox  = document.getElementById('api-results');
+
+  status.textContent = '⏳ Ищем в базе Open Food Facts...';
+  resBox.style.display = 'block';
+  resBox.innerHTML = '<div class="api-spinner">🔄 Загружаем результаты...</div>';
+
+  try {
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=15&fields=product_name,brands,nutriments`;
+    const resp = await fetch(url, { headers: { 'User-Agent': 'CalorieApp/1.0' } });
+    if (!resp.ok) throw new Error('Сеть недоступна');
+    const data = await resp.json();
+
+    const products = (data.products || []).filter(p => {
+      const n = p.nutriments;
+      return p.product_name &&
+        n['energy-kcal_100g'] != null &&
+        n['proteins_100g']    != null &&
+        n['fat_100g']         != null &&
+        n['carbohydrates_100g'] != null;
+    });
+
+    if (products.length === 0) {
+      resBox.innerHTML = '<div class="api-spinner">😕 Ничего не найдено. Попробуйте на английском.</div>';
+      status.textContent = 'Результатов: 0';
+      return;
+    }
+
+    status.textContent = `✅ Найдено: ${products.length} продуктов. Нажмите на нужный.`;
+    resBox.innerHTML = products.map((p, i) => {
+      const n   = p.nutriments;
+      const kcal = Math.round(n['energy-kcal_100g']    || 0);
+      const prot = (n['proteins_100g']                  || 0).toFixed(1);
+      const fat  = (n['fat_100g']                       || 0).toFixed(1);
+      const carb = (n['carbohydrates_100g']             || 0).toFixed(1);
+      const brand = p.brands ? ` · ${p.brands.split(',')[0]}` : '';
+      return `<div class="api-item" onclick="selectApiProduct(${i})">
+        <div class="api-item-name">${p.product_name}</div>
+        <div class="api-item-meta">на 100г${brand}</div>
+        <div class="api-item-macros">🔥 ${kcal} ккал &nbsp;|&nbsp; Б: ${prot}г &nbsp; Ж: ${fat}г &nbsp; У: ${carb}г</div>
+      </div>`;
+    }).join('');
+
+    // store for selection
+    window._apiResults = products;
+
+  } catch(e) {
+    resBox.innerHTML = '<div class="api-spinner">❌ Ошибка соединения. Проверьте интернет.</div>';
+    status.textContent = 'Ошибка загрузки';
+  }
+}
+
+function selectApiProduct(idx) {
+  const p = window._apiResults[idx];
+  if (!p) return;
+
+  const n    = p.nutriments;
+  const kcal = Math.round(n['energy-kcal_100g']    || 0);
+  const prot = +(n['proteins_100g']                 || 0).toFixed(2);
+  const fat  = +(n['fat_100g']                      || 0).toFixed(2);
+  const carb = +(n['carbohydrates_100g']            || 0).toFixed(2);
+  const name = p.product_name;
+
+  // Add to custom products and select it
+  const key = 'api_' + Date.now();
+  const custom = getCustomProducts();
+  custom[key] = { name, calories: kcal, protein: prot, fat: fat, carbs: carb };
+  saveCustomProducts(custom);
+  buildProductSelect();
+  document.getElementById('product').value = key;
+
+  // Hide API results
+  document.getElementById('api-results').style.display = 'none';
+  document.getElementById('api-status').textContent = `✅ Выбрано: ${name}`;
+  document.getElementById('api-search').value = '';
+
+  // Auto calculate
+  calculate();
+
+  // Scroll to result
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const sel = document.getElementById('product');
+
+  if (!q) { buildProductSelect(); return; }
+
+  sel.innerHTML = '';
+  let count = 0;
+
+  // search default
+  for (const cat of Object.values(DEFAULT_PRODUCTS)) {
+    for (const [key, item] of Object.entries(cat.items)) {
+      if (item.name.toLowerCase().includes(q)) {
+        const o = document.createElement('option');
+        o.value = key; o.textContent = item.name;
+        sel.appendChild(o); count++;
+      }
+    }
+  }
+  // search custom
+  const custom = getCustomProducts();
+  for (const [key, item] of Object.entries(custom)) {
+    if (item.name.toLowerCase().includes(q)) {
+      const o = document.createElement('option');
+      o.value = key; o.textContent = '⭐ ' + item.name;
+      sel.appendChild(o); count++;
+    }
+  }
+
+  if (count === 0) {
+    const o = document.createElement('option');
+    o.disabled = true; o.textContent = 'Ничего не найдено';
+    sel.appendChild(o);
+  }
+}
+
+// ─── CHART ───────────────────────────────────────────────────────────────────
+function drawChart(prot, fat, carb) {
+  const canvas = document.getElementById('bjuChart');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2, cy = canvas.height / 2, r = 88, inner = 52;
+
+  const total = prot + fat + carb;
+  if (total <= 0) return;
+
+  const slices = [
+    { label: 'Белки',    val: prot, color: '#c0392b' },
+    { label: 'Жиры',     val: fat,  color: '#c9a96e' },
+    { label: 'Углеводы', val: carb, color: '#4a7c59' },
+  ];
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let startAngle = -Math.PI / 2;
+  slices.forEach(s => {
+    const slice = (s.val / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    startAngle += slice;
+  });
+
+  // donut hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, inner, 0, Math.PI * 2);
+  ctx.fillStyle = '#fdfaf4';
+  ctx.fill();
+
+  // center text
+  ctx.fillStyle = '#2c2416';
+  ctx.font = 'bold 13px Nunito, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('БЖУ', cx, cy - 8);
+  ctx.font = '11px DM Sans, sans-serif';
+  ctx.fillStyle = '#9396aa';
+  ctx.fillText(total.toFixed(1) + 'г', cx, cy + 9);
+
+  // legend
+  const legend = document.getElementById('chart-legend');
+  legend.innerHTML = slices.map(s => {
+    const pct = ((s.val / total) * 100).toFixed(0);
+    return `<div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#5a5e78;">
+      <span style="width:10px;height:10px;border-radius:3px;background:${s.color};display:inline-block;flex-shrink:0;"></span>
+      ${s.label} ${pct}%
+    </div>`;
+  }).join('');
+}
+
+// ─── EXPORT DIARY ─────────────────────────────────────────────────────────────
+function exportDiary() {
+  const diary = getDiary();
+  const goal = getGoal();
+  let text = '=== ДНЕВНИК ПИТАНИЯ ===\n';
+  text += 'Дата: ' + new Date().toLocaleDateString('ru-RU') + '\n\n';
+
+  let totalCal=0, totalProt=0, totalFat=0, totalCarb=0;
+
+  for (const [meal, label] of Object.entries(MEAL_LABELS)) {
+    const entries = diary[meal] || [];
+    if (entries.length === 0) continue;
+    text += label + ':\n';
+    entries.forEach(e => {
+      totalCal  += e.calories;
+      totalProt += e.protein;
+      totalFat  += e.fat;
+      totalCarb += e.carbs;
+      text += `  • ${e.name} — ${e.grams}г | ${e.calories.toFixed(0)} ккал | Б:${e.protein.toFixed(1)} Ж:${e.fat.toFixed(1)} У:${e.carbs.toFixed(1)}\n`;
+    });
+    text += '\n';
+  }
+
+  text += '─────────────────────\n';
+  text += `ИТОГО:\n`;
+  text += `  Калории:  ${totalCal.toFixed(0)} ккал\n`;
+  text += `  Белки:    ${totalProt.toFixed(1)} г\n`;
+  text += `  Жиры:     ${totalFat.toFixed(1)} г\n`;
+  text += `  Углеводы: ${totalCarb.toFixed(1)} г\n`;
+
+  if (goal) {
+    text += '\nЦЕЛЬ:\n';
+    text += `  Калории:  ${goal.calories.toFixed(0)} ккал (${((totalCal/goal.calories)*100).toFixed(0)}%)\n`;
+    text += `  Белки:    ${goal.protein.toFixed(0)} г (${((totalProt/goal.protein)*100).toFixed(0)}%)\n`;
+    text += `  Жиры:     ${goal.fat.toFixed(0)} г (${((totalFat/goal.fat)*100).toFixed(0)}%)\n`;
+    text += `  Углеводы: ${goal.carbs.toFixed(0)} г (${((totalCarb/goal.carbs)*100).toFixed(0)}%)\n`;
+  }
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'дневник_питания_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+const MEAL_LABELS = {
+  breakfast: '🌅 Завтрак',
+  lunch:     '☀️ Обед',
+  dinner:    '🌙 Ужин',
+  snack:     '🍎 Перекус',
+};
+
+function addToDiary() {
+  if (!lastCalcResult) return;
+  const meal = document.getElementById('diary-meal-select').value;
+  const diary = getDiary();
+  diary[meal].push({ ...lastCalcResult });
+  saveDiary(diary);
+  alert('✅ Добавлено в ' + MEAL_LABELS[meal]);
+  renderDiary();
+}
+
+function deleteDiaryEntry(meal, idx) {
+  const diary = getDiary();
+  diary[meal].splice(idx, 1);
+  saveDiary(diary);
+  renderDiary();
+}
+
+function clearDiary() {
+  const cont = document.getElementById('diary-content');
+  cont.innerHTML = `
+    <div style="background:#fdecea;border:1.5px solid #f5c6c2;border-radius:12px;padding:18px;text-align:center;">
+      <div style="font-family:Nunito,sans-serif;font-weight:800;font-size:15px;color:#2c2416;margin-bottom:12px;">🗑 Очистить весь дневник?</div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="confirmClear()" style="background:#c0392b;color:white;border:none;border-radius:10px;padding:10px 22px;font-family:Nunito,sans-serif;font-weight:800;font-size:14px;cursor:pointer;">Да, очистить</button>
+        <button onclick="renderDiary()" style="background:#f5f0e8;color:#2c2416;border:2px solid #e0d5c0;border-radius:10px;padding:10px 22px;font-family:Nunito,sans-serif;font-weight:800;font-size:14px;cursor:pointer;">Отмена</button>
+      </div>
+    </div>`;
+}
+
+function confirmClear() {
+  saveDiary({breakfast:[],lunch:[],dinner:[],snack:[]});
+  renderDiary();
+}
+
+function renderDiary() {
+  const diary = getDiary();
+  const goal  = getGoal();
+  const cont  = document.getElementById('diary-content');
+
+  let totalCal=0, totalProt=0, totalFat=0, totalCarb=0;
+  let hasAny = false;
+
+  let html = '';
+
+  for (const [meal, label] of Object.entries(MEAL_LABELS)) {
+    const entries = diary[meal] || [];
+    if (entries.length === 0) continue;
+    hasAny = true;
+
+    let mCal=0;
+    entries.forEach(e => mCal += e.calories);
+
+    html += `<div class="meal-block">
+      <div class="meal-header">
+        <div class="meal-name">${label}</div>
+        <div class="meal-kcal">${mCal.toFixed(0)} ккал</div>
+      </div>
+      <div class="meal-entries">`;
+
+    entries.forEach((e, idx) => {
+      totalCal  += e.calories;
+      totalProt += e.protein;
+      totalFat  += e.fat;
+      totalCarb += e.carbs;
+      html += `<div class="meal-entry">
+        <div class="entry-name">${e.name}</div>
+        <div class="entry-meta">${e.grams}г · ${e.calories.toFixed(0)} ккал</div>
+        <button class="entry-del" onclick="deleteDiaryEntry('${meal}',${idx})" title="Удалить">×</button>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  }
+
+  if (!hasAny) {
+    cont.innerHTML = '<div class="empty-diary">Дневник пуст. Рассчитайте продукт<br>и добавьте его сюда 🍽</div>';
+    return;
+  }
+
+  // totals
+  html += `<div class="diary-totals">
+    <div class="dt-title">📊 Итого за день</div>
+    <div class="dt-row">Калории <span>${totalCal.toFixed(0)} ккал</span></div>
+    <div class="dt-row">Белки <span>${totalProt.toFixed(1)} г</span></div>
+    <div class="dt-row">Жиры <span>${totalFat.toFixed(1)} г</span></div>
+    <div class="dt-row">Углеводы <span>${totalCarb.toFixed(1)} г</span></div>`;
+
+  if (goal) {
+    const pctCal  = Math.min((totalCal  / goal.calories) * 100, 200);
+    const pctProt = Math.min((totalProt / goal.protein)  * 100, 200);
+    const pctFat  = Math.min((totalFat  / goal.fat)      * 100, 200);
+    const pctCarb = Math.min((totalCarb / goal.carbs)    * 100, 200);
+
+    html += `<div style="margin-top:12px;font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">% от цели</div>`;
+    html += goalBar('Калории',   totalCal,  goal.calories, pctCal,  'ккал');
+    html += goalBar('Белки',     totalProt, goal.protein,  pctProt, 'г');
+    html += goalBar('Жиры',      totalFat,  goal.fat,      pctFat,  'г');
+    html += goalBar('Углеводы',  totalCarb, goal.carbs,    pctCarb, 'г');
+  }
+
+  html += `</div>`;
+  cont.innerHTML = html;
+}
+
+function goalBar(label, cur, total, pct, unit) {
+  const over = pct >= 100;
+  return `<div class="goal-bar-wrap">
+    <div class="goal-bar-label"><span>${label}</span><span>${cur.toFixed(0)} / ${total.toFixed(0)} ${unit} · ${Math.round(pct)}%</span></div>
+    <div class="goal-bar-bg"><div class="goal-bar${over?' over':''}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+// ─── BMI & NORMS ─────────────────────────────────────────────────────────────
+let lastNorms = null;
+
+function calcBMI() {
+  const gender   = document.getElementById('gender').value;
+  const age      = parseFloat(document.getElementById('age').value);
+  const h        = parseFloat(document.getElementById('height').value);
+  const w        = parseFloat(document.getElementById('weight').value);
+  const activity = parseFloat(document.getElementById('activity').value);
+
+  if ([age,h,w].some(v => isNaN(v) || v <= 0)) {
+    alert('⚠️ Заполни все поля корректно!'); return;
+  }
+
+  const bmi = w / ((h/100) ** 2);
+  let catText = '', catClass = '';
+  if      (bmi < 18.5) { catText = 'Недостаточный вес'; catClass = 'badge-blue'; }
+  else if (bmi < 25)   { catText = 'Норма';             catClass = 'badge-green'; }
+  else if (bmi < 30)   { catText = 'Избыточный вес';    catClass = 'badge-yellow'; }
+  else                  { catText = 'Ожирение';          catClass = 'badge-red'; }
+
+  // Mifflin–St Jeor
+  let bmr;
+  if (gender === 'male') bmr = 10*w + 6.25*h - 5*age + 5;
+  else                   bmr = 10*w + 6.25*h - 5*age - 161;
+
+  const tdee = bmr * activity;
+  const prot = w * 2.0;
+  const fat  = (tdee * 0.25) / 9;
+  const carb = (tdee - prot*4 - fat*9) / 4;
+
+  lastNorms = { calories: tdee, protein: prot, fat: Math.round(fat), carbs: Math.round(carb) };
+
+  document.getElementById('bmi-val').textContent = bmi.toFixed(1);
+  document.getElementById('bmi-cat').innerHTML = `<span class="badge ${catClass}">${catText}</span>`;
+
+  document.getElementById('norm-grid').innerHTML = `
+    <div class="norm-item"><div class="ni-label">🔥 Калории</div><div class="ni-val">${Math.round(tdee)}<small style="font-size:13px;font-weight:600;color:var(--text-2)"> ккал</small></div></div>
+    <div class="norm-item"><div class="ni-label">🥩 Белки</div><div class="ni-val">${Math.round(prot)}<small style="font-size:13px;font-weight:600;color:var(--text-2)"> г</small></div></div>
+    <div class="norm-item"><div class="ni-label">🧈 Жиры</div><div class="ni-val">${Math.round(fat)}<small style="font-size:13px;font-weight:600;color:var(--text-2)"> г</small></div></div>
+    <div class="norm-item"><div class="ni-label">🍞 Углеводы</div><div class="ni-val">${Math.round(carb)}<small style="font-size:13px;font-weight:600;color:var(--text-2)"> г</small></div></div>
+  `;
+
+  document.getElementById('bmi-result').style.display = 'block';
+  document.getElementById('save-goal-block').style.display = 'block';
+  document.getElementById('goal-saved-msg').style.display = 'none';
+}
+
+function saveGoal() {
+  if (!lastNorms) return;
+  saveGoalLS(lastNorms);
+  document.getElementById('goal-saved-msg').style.display = 'block';
+  renderDiary();
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick').includes("'" + name + "'")) b.classList.add('active');
+  });
+  if (name === 'diary') renderDiary();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildProductSelect();
+calculate();
+</script>
+</body>
+</html>
